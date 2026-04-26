@@ -35,7 +35,7 @@ The entire thing runs for free. Zero rupees. Nada. We made deliberate decisions 
 Pulls from 10+ sources simultaneously, deduplicates using URL hashing, and stores everything in Postgres. Sources include Economic Times, Moneycontrol, Mint, Business Standard, NDTV Profit (via RSS, no API key needed) plus NewsAPI and GNews as structured API sources.
 
 ### AI Processing Layer
-Every article gets run through Google Gemini 1.5 Flash. The AI assigns a sentiment (positive / negative / neutral), an importance rating (high / medium / low), a category (economy / company / global / policy), extracts company and sector entities, and produces an impact score from 0 to 100. If Gemini is having a bad day, Groq with LLaMA 3 steps in as fallback. The prompt is carefully constructed so the output is always valid JSON, and the parser strips markdown code fences because AI models have a compulsive need to wrap everything in triple backticks even when you specifically ask them not to.
+Every article gets run through Google Gemini 3.1 Flash. The AI assigns a sentiment (positive / negative / neutral), an importance rating (high / medium / low), a category (economy / company / global / policy), extracts company and sector entities, and produces an impact score from 0 to 100. If Gemini is having a bad day, Groq with LLaMA 3 steps in as fallback. The prompt is carefully constructed so the output is always valid JSON, and the parser strips markdown code fences because AI models have a compulsive need to wrap everything in triple backticks even when you specifically ask them not to.
 
 ### Stock Mapping Engine
 A keyword matching engine scans every article's title and extracted entities against a manually curated list of all 50 NIFTY 50 stocks, each tagged with sector and a list of aliases (so "RIL", "Jio", and "Mukesh Ambani" all point to RELIANCE). Match scores are weighted: a direct entity match counts more than a title mention. Only the top 5 matching stocks per article get signals.
@@ -68,9 +68,9 @@ Because JavaScript will let you pass a string where you expect a number and then
 
 Supabase is PostgreSQL with a nice dashboard, a JavaScript SDK, Row Level Security, and a generous free tier (500MB database, 2GB bandwidth per month). We could have used Firebase, but Postgres is relational and our data is relational. Articles have signals. Signals reference articles. Snapshots track sentiment over time. Trying to do this in a document store like Firestore would have meant either deeply nested documents or a lot of manual join logic in application code. Postgres just handles it. Also, Supabase's table editor is genuinely useful for inspecting data during development without needing to run SQL every time.
 
-### Why Gemini 1.5 Flash?
+### Why Gemini 3.1 Flash?
 
-Because it's free (within rate limits), it's fast, and it's genuinely good at structured extraction tasks. The "Flash" model is specifically designed for high-throughput, lower-latency tasks, which is exactly what we need when processing batches of articles. We're not asking it to write poetry or reason about philosophy. We're asking it to read a news headline and fill in a JSON form. Flash handles this extremely well.
+Because it's free (within rate limits), it's fast, it's new, and it's genuinely good at structured extraction tasks. The "Flash" model is specifically designed for high-throughput, lower-latency tasks, which is exactly what we need when processing batches of articles. We're not asking it to write poetry or reason about philosophy. We're asking it to read a news headline and fill in a JSON form. Flash handles this extremely well.
 
 The prompt engineering here deserves a mention. The key insight is asking the model to respond with "ONLY a valid JSON object, no markdown, no explanation, no code blocks." And then parsing defensively anyway, stripping code fences in case the model gets creative. Trust but verify.
 
