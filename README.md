@@ -399,4 +399,4 @@ If you read all of that and still put your life savings into a stock because an 
 
 Built with curiosity, caffeine, and an unreasonable fondness for monospace fonts.
 
-**[newsia.vercel.app](https://newsia.vercel.app)** -- live demo coming soon
+**[newsia.vercel.app](https://newsian.vercel.app)** -- live demo coming soon
